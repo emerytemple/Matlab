@@ -1,4 +1,6 @@
 function [xc, yc, xr, yr] = first_pts(tht, xpe, rrre, gamma)
+    format long
+
     me = Supersonic('Mar','x',xpe,'g',gamma);
     ve = Supersonic('nu','M',me,'g',gamma);
 

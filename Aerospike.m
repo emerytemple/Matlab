@@ -1,16 +1,57 @@
-function[] = Aerospike()
+function Aerospike()
 clear all
 clc
 format long
 
+xpguess = 26
+[xc,yc,xr,yr] = first_pts(0,xpguess,0.1,1.1213);
+
+R = 7.25
+r = yr*(R/yc)
+
+Ar = pi*r*r
+Ac = pi*R*R
+Aan = Ac-Ar
+Atot = 0.8446
+
+ti = 0.25
+n = ((2*r)/ti)*((Aan-Atot)/((R*R)-(r*r)))
+n1 = floor(n)
+n2 = ceil(n)
+
+ti1 = ((2*r)/n1)*((Aan-Atot)/((R*R)-(r*r)))
+ti2 = ((2*r)/n2)*((Aan-Atot)/((R*R)-(r*r)))
+
+t1 = abs(ti1-0.25)
+t2 = abs(ti2-0.25)
+
+if t1 < t2
+    treal = ti1
+    nreal = n1
+else
+    treal = ti2
+    nreal = n2
+end
+treal
+nreal
+
+li = ((2*pi*r)/nreal)-treal
+
+% n = ((2*r)/ti)*((Aan-Atot)/((R*R)-(r*r)))
+
 % [x1,y1] = linear_external(20,1,1.4,20);
 % check_linear_external(x1,y1)
 
-% [x2,y2] = axisymmetric_external(20,1,1.4,20);
+% MMM = Supersonic('Mar','x',75,'g',1.2575)
+% ansss = Supersonic('nu','M',MMM,'g',1.2575)
+% [x2,y2] = axisymmetric_external(75,1,1.4,20)
 % check_axisymmetric_external(x2,y2)
+% plot(x2,y2)
 
-% [x3,y3] = axisymmetric_external2(20,1,1.4,20);
+% [x3,y3] = axisymmetric_external2(75,1,1.4,20)
 % check_axisymmetric_external(x3,y3)
+% 
+% plot(x2,y2,x3,y3)
 
 % plot(x1,y1,x2,y2,x3,y3); %,x4,y4);
 
@@ -18,16 +59,27 @@ format long
 % [xc1, yc1, xr1, yr1] = linear_internal(200,1,90,1.2575,100,100,wtf1) % here
 % check_linear_internal(xc1, yc1, xr1, yr1)
 
-wtf2 = fzero(@(x) root2(x), 175);
-[xc2, yc2, xr2, yr2] = axisymmetric_internal(wtf2,1,90,1.2575,50,75,0.17);
-check_axisymmetric_internal(xc2, yc2, xr2, yr2)
+% wtf2 = fzero(@(x) root2(x), 175);
+% [xc2, yc2, xr2, yr2] = axisymmetric_internal(wtf2,1,90,1.2575,50,75,0.17);
+% check_axisymmetric_internal(xc2, yc2, xr2, yr2)
 
 % hold on
 % plot(xc1,yc1,xr1,yr1)
-plot(xc2,yc2,xr2,yr2)
+% plot(xc2,yc2,xr2,yr2)
 % hold off
 
 
+end
+
+function [val] = crappy(lame)
+    [xc,yc,xr,yr] = first_pts(0,1,0.1,1.1213);
+
+    yr = yr*(7.25/yc)
+    yc = yc*(7.25/yc)
+    
+    Ar = pi*yr*yr
+    Ac = pi*yc*yc
+    Aannulus = Ac-Ar
 end
 
 function [ar] = root1(crapval)
@@ -187,11 +239,16 @@ function [x,y] = axisymmetric_external(xp, tlen, gamma, nr) % axi-symmetric exte
         eps = Supersonic('A/A*','M',M,'g',gamma);
         xsi = (1.0-sqrt(1.0-((eps/xp)*M*sin(alpha))))/sin(alpha);
 
+        alphaaa(i) = alpha*(180.0/pi);
+        xsiii(i) = xsi;
+        
         % redimensionalize
         L = xsi*re;
         x(i) = L*cos(alpha);
         y(i) = -L*sin(alpha);
     end
+    xsiii'
+    alphaaa'
 end
 
 function [x, y] = axisymmetric_external2(xp, tlen, gama, nr) % axi-symmetric external contour 2
@@ -207,30 +264,27 @@ function [x, y] = axisymmetric_external2(xp, tlen, gama, nr) % axi-symmetric ext
     theta = (pi/2.0)-ve;
     ht = (xp-sqrt(xp*(xp-sin(theta))))/(xp*sin(theta));
 
-    drm = (rm-1.0)/nr;
+    drm = (rm-1.0)/(nr-1);
 
     xm(1)=1.0;
     rxre(1) = 1.0-ht*sin(theta);
     xxre(1) = -ht*cos(theta);
 
     i = 2;
-    while i-nr-1 <= 0
+    while i-nr <= 0
         xm(i) = xm(i-1) + drm;
         vx = Supersonic('nu','M',xm(i),'g',gama)*(pi/180.0);
-        y = 1.0/xm(i);
-        ux = atan(y/sqrt(1.0-y*y));
+        ux = Supersonic('mu','M',xm(i))*(pi/180.0);
 
-        a2 = (gama+1.0)/(2.0*(gama-1.0));
-        ToT = Supersonic('To/T','M',xm(i),'g',gama);
-        b2 = (2.0/(gama+1.0))*ToT;
-        rxre(i) = sqrt(1.0-(b2^a2)*sin(ve-vx+ux)/xp);
+        part = xm(i)*Supersonic('A/A*','M',xm(i),'g',gama);
+        rxre(i) = sqrt(1.0-part*sin(ve-vx+ux)/xp);
         xxre(i) = (1.0-rxre(i))*cos(ve-vx+ux)/sin(ve-vx+ux);
 
         i = i+1;
     end
 
-    x = real(xxre)';
-    y = real(rxre)'-1.0;
+    x = real(xxre);
+    y = real(rxre)-1.0;
     
     alen = sqrt((x(1)^2)+(y(1)^2));
     scale = tlen/alen;

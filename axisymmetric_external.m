@@ -85,7 +85,10 @@ function [x,y] = axisymmetric_external(xpi, xp, re, gamma, nr) % axi-symmetric e
         final(i-ind+3,2) = y(i);
     end
     
-    plot(final(:,1),final(:,2),xp,yp,'o',xc,yc,'o',x,y,xp1,yp1,'o')
+    
+    final
+    
+    plot(final(:,1),final(:,2),xp,yp,'o',xc,yc,'o',x,y)
     check_axisymmetric_external(final(:,1),final(:,2))
 end
 

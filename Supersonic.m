@@ -38,16 +38,7 @@ end
 
 % calculate value
 switch string
-    % ideal gas
-    case 'a'
-        if exist('gama','var') && exist('P','var') && exist('rho','var')
-            varargout{1} = sqrt((gama*P)./rho);
-        elseif exist('gama','var') && exist('R','var') && exist('T','var')
-            varargout{1} = sqrt(gama*R*T);
-        else
-            error = 1
-        end
-        
+
     % 1-D
     case 'P*/Po'
         varargout{1} = (2.0/gp1)^(gama/gm1);
@@ -220,7 +211,5 @@ switch string
     otherwise
         error = 1
 end
-
-
 
 end

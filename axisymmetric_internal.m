@@ -1,22 +1,29 @@
 function [xc, yc, xr, yr] = axisymmetric_internal(tht, xpe, rrre, gamma, nei, ne)
+%     tht = tht*(pi/180.0);
+
     me = Supersonic('Mar','x',xpe,'g',gamma);
     ve = Supersonic('nu','M',me,'g',gamma);
 
     vei = (ve-tht)/2.0;
     
     mei = Supersonic('Mnu','v',vei,'g',gamma);
+%     mei = Supersonic('Mar','x',xpei,'g',gamma);
+%     vei = Supersonic('nu','M',mei,'g',gamma);
     uei = Supersonic('mu','M',mei)*(pi/180.0);
     xpei = Supersonic('A/A*','M',mei,'g',gamma);
 
+%     tht = ve-(2.0*vei);
+
     ve = ve*(pi/180.0);
-    vei = vei*(pi/180);
+    vei = vei*(pi/180.0);
+    
     aei = (uei+vei-ve);
 
     % find point P
     rpre = sqrt(1.0-mei*xpei*sin(aei)/xpe);
     xpre = (rpre-1.0)*cos(aei)/sin(aei);
 
-    tht = pi/2.0-(tht*(pi/180.0));
+    tht = pi/2.0-(tht*(pi/180.0)); % ???
     
     % calculate internal contours
     dm = (mei-1.0)/(nei-1.0);
@@ -41,7 +48,7 @@ function [xc, yc, xr, yr] = axisymmetric_internal(tht, xpe, rrre, gamma, nei, ne
     end
 
     % calculate external contour
-    dm = (me-mei)/(nei-1.0);
+    dm = (me-mei)/(ne-1.0);
     for i = 1:ne
         mx = mei+((i-1)*dm);
 
@@ -52,7 +59,7 @@ function [xc, yc, xr, yr] = axisymmetric_internal(tht, xpe, rrre, gamma, nei, ne
         yr(nei+i) = sqrt(1-mx*xpx*sin(ve-vx+ux)/xpe);
         xr(nei+i) = (1-yr(nei+i))/tan(ve-vx+ux);
     end
-
+    
     % redimensionalize
 %     re = 11.864303702576;
 %     for i = 1:nei
